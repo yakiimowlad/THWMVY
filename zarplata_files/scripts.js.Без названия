@@ -1,0 +1,51 @@
+function format(nStr) {
+	nStr = nStr.toFixed(2);
+	nStr += '';
+	x = nStr.split('.');
+	x1 = x[0];
+	x2 = x.length > 1 ? '.' + x[1] : '';
+	var rgx = /(\d+)(\d{3})/;
+	while (rgx.test(x1)) {
+		x1 = x1.replace(rgx, '$1' + ',' + '$2');
+	}
+	return x1 + x2;
+}
+
+function microtime(get_as_float) {
+	var now = new Date()
+		.getTime() / 1000;
+	var s = parseInt(now, 10);
+
+	return (get_as_float) ? now : (Math.round((now - s) * 1000) / 1000) + ' ' + s;
+}
+
+$(function() {
+	
+	var sechin = 50000000;
+	var kostin = 6000;
+	var yakunin = 15000000;
+	var usdrub = 65;
+	var time_start = microtime(true);
+	
+	$.ajax({
+		dataType: "jsonp",
+		url: "https://api.fixer.io/latest?base=USD",
+		success: function(data) {
+			usdrub = data.rates.RUB;
+		}
+	});
+	
+	var sec_in_year = 60*60*24*365;
+	
+	var timer = 0;
+	setInterval(function() {
+		timer = microtime(true) - time_start;
+		$("#sechin .salary span.usd").text("$" + format(timer*(sechin/sec_in_year)));
+		$("#sechin .salary span.rur").text(format(timer*(sechin/sec_in_year)*usdrub) + " ₽");
+		$("#kostin .salary span.usd").text("$" + format(timer*(kostin/sec_in_year)));
+		$("#kostin .salary span.rur").text(format(timer*(kostin/sec_in_year)*usdrub) + " ₽");
+		$("#yakunin .salary span.usd").text("$" + format(timer*(yakunin/sec_in_year)));
+		$("#yakunin .salary span.rur").text(format(timer*(yakunin/sec_in_year)*usdrub) + " ₽");
+		$.cookie("time", microtime(true));
+	}, 100);
+});
